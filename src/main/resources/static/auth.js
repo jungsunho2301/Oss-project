@@ -23,6 +23,7 @@ window.addEventListener("click", (e) => {
     }
 });
 
+window.isLoggedIn = false;
 // 로그인 처리
 loginBtn.addEventListener("click", async () => {
     const id = document.getElementById("login-id").value.trim();
@@ -43,6 +44,9 @@ loginBtn.addEventListener("click", async () => {
 
         const data = await response.json();
         alert(`로그인 성공! 환영합니다, ${data.username}님.`);
+        isLoggedIn = true;
+
+        document.getElementById("post-form").style.display = "block";
         // TODO: 로그인 성공 후 처리 (토큰 저장, 페이지 이동 등)
     } catch (error) {
         alert("로그인에 실패했습니다. 다시 시도해주세요.");
