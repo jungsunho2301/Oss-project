@@ -15,20 +15,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // 개발 중엔 비활성화
+                .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/index.html")
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/", true)
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/index.html")
                         .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendRedirect("/index.html") // 인증 안 되면 index로 리디렉션
+                        )
                 );
 
         return http.build();
