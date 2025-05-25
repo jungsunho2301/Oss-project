@@ -15,23 +15,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf().disable()  // 개발 중이므로 일단 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()  // 정적 리소스 및 루트는 모두 허용
+                        .anyRequest().authenticated()  // 나머지는 인증 필요
                 )
                 .formLogin(form -> form
-                        .loginPage("/index.html")
+                        .loginProcessingUrl("/login")  // JS에서 POST 요청할 로그인 처리 URL
+                        .successHandler((request, response, authentication) -> {
+                            // 로그인 성공 시 별도 페이지 이동 없이 HTTP 상태만 전달 (JS가 처리하도록)
+                            response.setStatus(200);
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(401);
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/index.html")
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(200);
+                        })
                         .permitAll()
-                )
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendRedirect("/index.html") // 인증 안 되면 index로 리디렉션
-                        )
                 );
 
         return http.build();
